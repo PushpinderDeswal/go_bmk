@@ -9,10 +9,10 @@ import (
 )
 
 type BookmarkRepository interface {
-	GetBookmark(ctx *context.Context, id string) (*models.Bookmark, error)
-	GetAllBookmarks(ctx *context.Context) ([]models.Bookmark, error)
-	AddBookmark(ctx *context.Context, Bookmark *models.Bookmark) error
-	DeleteBookmark(ctx *context.Context, id string) error
+	GetBookmark(ctx context.Context, id string) (*models.Bookmark, error)
+	GetAllBookmarks(ctx context.Context) ([]models.Bookmark, error)
+	AddBookmark(ctx context.Context, Bookmark *models.Bookmark) error
+	DeleteBookmark(ctx context.Context, id string) error
 }
 
 type SQLiteBookmarkRepository struct {
@@ -23,9 +23,9 @@ func MakeSQLiteBookmarkRepository(db *sql.DB) *SQLiteBookmarkRepository {
 	return &SQLiteBookmarkRepository{db: db}
 }
 
-func (r *SQLiteBookmarkRepository) GetBookmark(ctx *context.Context, id string) (*models.Bookmark, error) {
+func (r *SQLiteBookmarkRepository) GetBookmark(ctx context.Context, id string) (*models.Bookmark, error) {
 	query := `SELECT id, url, created_at FROM bookmarks WHERE id = ?`
-	row := r.db.QueryRowContext(*ctx, query, id)
+	row := r.db.QueryRowContext(ctx, query, id)
 
 	var bookmark models.Bookmark
 	err := row.Scan(&bookmark.ID, &bookmark.Url, &bookmark.CreatedAt)
@@ -41,10 +41,10 @@ func (r *SQLiteBookmarkRepository) GetBookmark(ctx *context.Context, id string) 
 	return nil, err
 }
 
-func (r *SQLiteBookmarkRepository) GetAllBookmarks(ctx *context.Context) ([]models.Bookmark, error) {
+func (r *SQLiteBookmarkRepository) GetAllBookmarks(ctx context.Context) ([]models.Bookmark, error) {
 	query := `SELECT id, url, created_at FROM bookmarks`
 
-	rows, err := r.db.QueryContext(*ctx, query)
+	rows, err := r.db.QueryContext(ctx, query)
 
 	if err != nil {
 		return nil, err
@@ -66,9 +66,9 @@ func (r *SQLiteBookmarkRepository) GetAllBookmarks(ctx *context.Context) ([]mode
 	return bookmarks, nil
 }
 
-func (r *SQLiteBookmarkRepository) AddBookmark(ctx *context.Context, bookmark *models.Bookmark) error {
+func (r *SQLiteBookmarkRepository) AddBookmark(ctx context.Context, bookmark *models.Bookmark) error {
 	query := `INSERT INTO bookmarks (id, url, created_at) VALUES (?, ?, ?)`
-	_, err := r.db.ExecContext(*ctx, query, bookmark.ID, bookmark.Url, bookmark.Url)
+	_, err := r.db.ExecContext(ctx, query, bookmark.ID, bookmark.Url, bookmark.CreatedAt)
 
 	if err != nil {
 		return err
@@ -77,9 +77,9 @@ func (r *SQLiteBookmarkRepository) AddBookmark(ctx *context.Context, bookmark *m
 	return nil
 }
 
-func (r *SQLiteBookmarkRepository) DeleteBookmark(ctx *context.Context, id string) error {
+func (r *SQLiteBookmarkRepository) DeleteBookmark(ctx context.Context, id string) error {
 	query := `DELETE FROM bookmarks WHERE id = ?`
-	_, err := r.db.ExecContext(*ctx, query, id)
+	_, err := r.db.ExecContext(ctx, query, id)
 
 	return err
 }

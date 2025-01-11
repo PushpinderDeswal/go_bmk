@@ -13,7 +13,11 @@ type BookmarkService struct {
 	repo repository.BookmarkRepository
 }
 
-func (s *BookmarkService) AddBookmark(ctx *context.Context, url string) error {
+func NewBookmarkService(repo repository.BookmarkRepository) *BookmarkService {
+	return &BookmarkService{repo: repo}
+}
+
+func (s *BookmarkService) AddBookmark(ctx context.Context, url string) error {
 	now := time.Now()
 
 	bookmark := &models.Bookmark{
@@ -25,14 +29,14 @@ func (s *BookmarkService) AddBookmark(ctx *context.Context, url string) error {
 	return s.repo.AddBookmark(ctx, bookmark)
 }
 
-func (s *BookmarkService) GetBookmark(ctx *context.Context, id string) (*models.Bookmark, error) {
+func (s *BookmarkService) GetBookmark(ctx context.Context, id string) (*models.Bookmark, error) {
 	return s.repo.GetBookmark(ctx, id)
 }
 
-func (s *BookmarkService) GetAllBookmarks(ctx *context.Context, id string) ([]models.Bookmark, error) {
+func (s *BookmarkService) GetAllBookmarks(ctx context.Context) ([]models.Bookmark, error) {
 	return s.repo.GetAllBookmarks(ctx)
 }
 
-func (s *BookmarkService) DeleteBookmark(ctx *context.Context, id string) error {
+func (s *BookmarkService) DeleteBookmark(ctx context.Context, id string) error {
 	return s.repo.DeleteBookmark(ctx, id)
 }

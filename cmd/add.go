@@ -2,7 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"net/url"
+	"os"
 
+	"github.com/PushpinderDeswal/go_bmk/repository"
+	"github.com/PushpinderDeswal/go_bmk/services"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +17,26 @@ var addCmd = &cobra.Command{
 	Short: "Add new url to bookmark list",
 	Long:  `Save new URL as a bookmark in bookmark database`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		if len(args) == 0 {
+			fmt.Println("Required url as first argument.")
+			os.Exit(1)
+		}
+		inputUrl := args[0]
+		parsedUrl, err := url.ParseRequestURI(inputUrl)
+
+		if err != nil {
+			fmt.Println("Invalid url")
+			os.Exit(1)
+		}
+
+		serv := services.NewBookmarkService(repository.MakeSQLiteBookmarkRepository(db))
+
+		err = serv.AddBookmark(cmd.Context(), parsedUrl.String())
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Url saved as bookmark.")
 	},
 }
 
