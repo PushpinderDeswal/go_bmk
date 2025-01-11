@@ -2,7 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"text/tabwriter"
 
+	"github.com/PushpinderDeswal/go_bmk/repository"
+	"github.com/PushpinderDeswal/go_bmk/services"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +17,23 @@ var lsCmd = &cobra.Command{
 	Short: "list bookmarks",
 	Long:  `Show list of all bookmarks, can accept --id flag to filter based on id and --top to show only top x results`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("ls called")
+		serv := services.NewBookmarkService(repository.MakeSQLiteBookmarkRepository(db))
+
+		bmks, err := serv.GetAllBookmarks(cmd.Context())
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		writer := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+
+		fmt.Fprintln(writer, "ID\tURL\tCreated At")
+		for _, bmk := range bmks {
+			formattedCreatedAt := bmk.CreatedAt.Format("Jan 02, 2006 15:04")
+			fmt.Fprintf(writer, "%v\t%v\t%v\n", bmk.ID, bmk.Url, formattedCreatedAt)
+		}
+
+		writer.Flush()
 	},
 }
 

@@ -2,22 +2,37 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
 
+	"github.com/PushpinderDeswal/go_bmk/repository"
+	"github.com/PushpinderDeswal/go_bmk/services"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
 
 // rmCmd represents the rm command
 var rmCmd = &cobra.Command{
 	Use:   "rm",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Remove a bookmark",
+	Long: `rm remove a bookmark using bookmark id: 
+		USAGE: bmk rm <bookmark_id>`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("rm called")
+		if len(args) == 0 {
+			fmt.Println("Please provide bookmark id")
+			os.Exit(1)
+		}
+		if uuid.Validate(args[0]) != nil {
+			fmt.Println("Invalid bookmark id")
+			os.Exit(1)
+		}
+		serv := services.NewBookmarkService(repository.MakeSQLiteBookmarkRepository(db))
+
+		if err := serv.DeleteBookmark(cmd.Context(), args[0]); err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Deleted bookmark with id %v\n", args[0])
 	},
 }
 
